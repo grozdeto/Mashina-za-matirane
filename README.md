@@ -10,3 +10,37 @@
 C, Arduino Mega, Embeded
 
 ## Използвани материали:
+### 1)Maximum load: AC 250V/10A, DC 30V/10A
+Trigger current: 5mA
+Working voltage: 5V
+Module size: 50 x 26 x 18.5mm (L x W x H)
+Four mounting bolts holes, diameter 3.1mm
+DC+: positive power supply (VCC)
+DC-: negative power supply (GND)
+IN: can be high or low level control relay
+NO: normally open relay interface
+COM: Common Interface Relays
+NC: normally closed relay interface
+Maximum load: AC 250V/10A, DC 30V/10A
+Trigger current: 5mA
+Working voltage: 5V
+Module size: 50 x 26 x 18.5mm (L x W x H)
+Four mounting bolts holes, diameter 3.1mm
+DC+: positive power supply (VCC)
+DC-: negative power supply (GND)
+IN: can be high or low level control relay
+NO: normally open relay interface
+COM: Common Interface Relays
+NC: normally closed relay interface
+### 2)  HC-SR04 Sensors
+    Operating voltage: +5V
+    Theoretical  Measuring Distance: 2cm to 450cm
+    Practical Measuring Distance: 2cm to 80cm
+    Accuracy: 3mm
+    Measuring angle covered: <15°
+    Operating Current: <15mA
+    Operating Frequency: 40Hz
+### 3) RGB LED лента
+### 4) ON/OFF buttons
+### 5) Помпи за въздух
+### 6) Ел. клапани
