@@ -1,5 +1,5 @@
 const int teamCount = 2;
-const int pourDelay = 1500; // how long to pour per shot
+const int pourDelay[2] = {10000,5000}; // how long to pour per shot
 const int startButton = 27;
 const int turnButton = 8;
 int lastTurnButtonState;
@@ -70,7 +70,7 @@ void loop() {
   for (int i=0; i<sensorCount; i++) {
     if (cups[team][i]) continue; // don't even bother checking already shot cups
     if (distances[i] >= 15 || distances[i] <= 1) continue; // no detection
-    pumpEnables[alcoholPerCup[i]] += pourDelay;
+    pumpEnables[alcoholPerCup[i]] += pourDelay[alcoholPerCup[i]];
     cups[team][i] = 1;
   }
   
