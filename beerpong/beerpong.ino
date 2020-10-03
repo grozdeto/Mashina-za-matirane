@@ -11,7 +11,10 @@ int pumpEnables[pumpCount];
 int cups[sensorCount];
 const int alcoholPerCup[sensorCount] = {0, 0, 1, 1};
 
+char serialBuffer[150];
+
 void setup() {
+  Serial.begin(19200);
   pinMode(startButton, INPUT_PULLUP);
   pinMode(turnButton, INPUT_PULLUP);
   for (int i=0; i<sensorCount; i++) {
@@ -41,20 +44,29 @@ void loop() {
     digitalWrite(sensorTriggers[i], HIGH);
     delayMicroseconds(10);
     digitalWrite(sensorTriggers[i], LOW);
-    distances[i] = (pulseIn(sensorEchos[i], HIGH)/2)*0.0343;
+    float duration = pulseIn(sensorEchos[i], HIGH);
+    distances[i] = (duration/2)*0.0343;
+    
+    sprintf(serialBuffer, "Sensor %d: ", i);
+    Serial.print(serialBuffer);
+    Serial.println(distances[i]);
   }
   
   for (int i=0; i<sensorCount; i++) {
     if (cups[i]) continue; // don't even bother checking already shot cups
     if (distances[i] >= 15 || distances[i] <= 1) continue; // no detection
     pumpEnables[alcoholPerCup[i]] += pourDelay;
+    cups[i] = 1;
   }
   
   for (int i=0; i<pumpCount; i++) {
+    sprintf(serialBuffer, "Pump %d:%d\n", i, pumpEnables[i]);
+    Serial.print(serialBuffer);
     if (pumpEnables[i] == 0) continue;
     digitalWrite(pumps[i], LOW);
     delay(pumpEnables[i]);
     digitalWrite(pumps[i], HIGH);
+    pumpEnables[i] = 0;
   }
     
   
