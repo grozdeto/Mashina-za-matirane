@@ -16,6 +16,43 @@ const int lights[sensorCount] = {32,33,34,35};
 
 char serialBuffer[150];
 
+void updateTeam() {
+  int newTurnButtonState = digitalRead(turnButton);
+  if (newTurnButtonState != lastTurnButtonState) {
+    lastTurnButtonState = newTurnButtonState;
+    team++;
+    if (team == teamCount) team = 0;
+    delay(15);
+  }
+  Serial.print("Team: ");
+  Serial.println(team);
+}
+
+void determineShots() {
+  double distances[sensorCount];
+  for (int i=0; i<sensorCount; i++) {
+    digitalWrite(sensorTriggers[i], LOW);
+    delayMicroseconds(2);
+    digitalWrite(sensorTriggers[i], HIGH);
+    delayMicroseconds(10);
+    digitalWrite(sensorTriggers[i], LOW);
+    long long int duration = pulseIn(sensorEchos[i], HIGH);
+    distances[i] = duration*0.0343/2;
+    
+    Serial.print("Sensor ");
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.println(distances[i]);
+  }
+  
+  for (int i=0; i<sensorCount; i++) {
+    if (cups[team][i]) continue; // don't even bother checking already shot cups
+    if (distances[i] >= 15 || distances[i] <= 1) continue; // incorrect measurement
+    pumpEnables[alcoholPerCup[i]] += pourDelay[alcoholPerCup[i]];
+    cups[team][i] = 1;
+  }
+}
+
 void updateLights() {
   for (int i=0; i<sensorCount; i++) {
     if (cups[team][i] == 1) {
@@ -23,6 +60,20 @@ void updateLights() {
     } else {
       digitalWrite(lights[i], HIGH);
     }
+  }
+}
+
+void pumpAction() {
+  for (int i=0; i<pumpCount; i++) {
+    Serial.print("Pump ");
+    Serial.print(i);
+    Serial.print(" :");
+    Serial.println(pumpEnables[i]);
+    if (pumpEnables[i] == 0) continue;
+    digitalWrite(pumps[i], LOW);
+    //delay(pumpEnables[i]);
+    digitalWrite(pumps[i], HIGH);
+    pumpEnables[i] = 0;
   }
 }
 
@@ -51,53 +102,9 @@ void setup() {
 
 void loop() {
   if (digitalRead(startButton) == HIGH) return;
-  
-  int newTurnButtonState = digitalRead(turnButton);
-  if (newTurnButtonState != lastTurnButtonState) {
-    lastTurnButtonState = newTurnButtonState;
-    team++;
-    if (team == teamCount) team = 0;
-    delay(15);
-  }
-  Serial.print("Team: ");
-  Serial.println(team);
-  
-  double distances[sensorCount];
-  for (int i=0; i<sensorCount; i++) {
-    digitalWrite(sensorTriggers[i], LOW);
-    delayMicroseconds(2);
-    digitalWrite(sensorTriggers[i], HIGH);
-    delayMicroseconds(10);
-    digitalWrite(sensorTriggers[i], LOW);
-    long long int duration = pulseIn(sensorEchos[i], HIGH);
-    distances[i] = duration*0.0343/2;
-    
-    Serial.print("Sensor ");
-    Serial.print(i);
-    Serial.print(": ");
-    Serial.println(distances[i]);
-  }
-  
-  for (int i=0; i<sensorCount; i++) {
-    if (cups[team][i]) continue; // don't even bother checking already shot cups
-    if (distances[i] >= 15 || distances[i] <= 1) continue; // incorrect measurement
-    pumpEnables[alcoholPerCup[i]] += pourDelay[alcoholPerCup[i]];
-    cups[team][i] = 1;
-  }
-  
+  updateTeam();
+  determineShots();
   updateLights();
-
-  for (int i=0; i<pumpCount; i++) {
-    Serial.print("Pump ");
-    Serial.print(i);
-    Serial.print(" :");
-    Serial.println(pumpEnables[i]);
-    if (pumpEnables[i] == 0) continue;
-    digitalWrite(pumps[i], LOW);
-    delay(pumpEnables[i]);
-    digitalWrite(pumps[i], HIGH);
-    pumpEnables[i] = 0;
-  }
-  
+  pumpAction();
 }
 
