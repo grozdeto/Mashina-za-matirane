@@ -1,4 +1,4 @@
-const int teamCount = 2;
+const int teamCount = 200;
 const int pourDelay[2] = {10000,5000}; // how long to pour per shot
 const int startButton = 27;
 const int turnButton = 8;
@@ -12,8 +12,19 @@ int pumpEnables[pumpCount];
 int cups[teamCount][sensorCount];
 const int alcoholPerCup[sensorCount] = {1,0,1,0};
 int team = 0;
+const int lights[sensorCount] = {32,33,34,35};
 
 char serialBuffer[150];
+
+void updateLights() {
+  for (int i=0; i<sensorCount; i++) {
+    if (cups[team][i] == 1) {
+      digitalWrite(lights[i], LOW);
+    } else {
+      digitalWrite(lights[i], HIGH);
+    }
+  }
+}
 
 void setup() {
   Serial.begin(19200);
@@ -35,7 +46,7 @@ void setup() {
       cups[t][i] = 0; // cups begin unshot
     }
   }
-  
+  updateLights();
 }
 
 void loop() {
@@ -51,15 +62,15 @@ void loop() {
   Serial.print("Team: ");
   Serial.println(team);
   
-  float distances[sensorCount];
+  double distances[sensorCount];
   for (int i=0; i<sensorCount; i++) {
     digitalWrite(sensorTriggers[i], LOW);
     delayMicroseconds(2);
     digitalWrite(sensorTriggers[i], HIGH);
     delayMicroseconds(10);
     digitalWrite(sensorTriggers[i], LOW);
-    float duration = pulseIn(sensorEchos[i], HIGH);
-    distances[i] = (duration/2)*0.0343;
+    long long int duration = pulseIn(sensorEchos[i], HIGH);
+    distances[i] = duration*0.0343/2;
     
     Serial.print("Sensor ");
     Serial.print(i);
@@ -69,11 +80,13 @@ void loop() {
   
   for (int i=0; i<sensorCount; i++) {
     if (cups[team][i]) continue; // don't even bother checking already shot cups
-    if (distances[i] >= 15 || distances[i] <= 1) continue; // no detection
+    if (distances[i] >= 15 || distances[i] <= 1) continue; // incorrect measurement
     pumpEnables[alcoholPerCup[i]] += pourDelay[alcoholPerCup[i]];
     cups[team][i] = 1;
   }
   
+  updateLights();
+
   for (int i=0; i<pumpCount; i++) {
     Serial.print("Pump ");
     Serial.print(i);
