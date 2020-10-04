@@ -80,10 +80,11 @@ void pumpAction() {
     Serial.println(pumpEnables[i]);
     if (pumpEnables[i] == 0) continue;
     digitalWrite(pumps[i], LOW);
-    //delay(pumpEnables[i]);
+    delay(pumpEnables[i]);
     digitalWrite(pumps[i], HIGH);
     pumpEnables[i] = 0;
   }
+  delay(10); // give ultrasound sensors some time
 }
 
 void calibrateSensors() {
@@ -148,6 +149,6 @@ void loop() {
   determineShots();
   updateLights();
   pumpAction();
-  delay(200);
+  //delay(200);
 }
 
