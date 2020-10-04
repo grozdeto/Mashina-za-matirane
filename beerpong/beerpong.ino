@@ -7,7 +7,7 @@ const int sensorTriggers[sensorCount] = {22,24,26,28};
 const int sensorEchos[sensorCount] = {40,42,44,46};
 const int pumpCount = 2;
 const int pumps[pumpCount] = {4,5};
-const long int pourDelay[pumpCount] = {40000,20000}; // how long to pour per shot
+const long int pourDelay[pumpCount] = {40000,10000}; // how long to pour per shot
 long int pumpEnables[pumpCount];
 int cups[teamCount][sensorCount];
 const int alcoholPerCup[sensorCount] = {1,0,1,0};
