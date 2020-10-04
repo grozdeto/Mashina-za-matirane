@@ -135,7 +135,15 @@ void setup() {
 }
 
 void loop() {
-  if (digitalRead(startButton) == HIGH) return;
+  if (digitalRead(startButton) == HIGH) {
+    for (int i=0; i<sensorCount; i++) {
+      for (int j=0; j<teamCount; j++) {
+        cups[j][i] = 0;
+      }
+      digitalWrite(lights[i], LOW);
+    }  
+    return;
+  }
   updateTeam();
   determineShots();
   updateLights();
