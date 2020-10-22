@@ -7,17 +7,12 @@ const int sensorTriggers[sensorCount] = {22,24,26,28};
 const int sensorEchos[sensorCount] = {40,42,44,46};
 const int pumpCount = 2;
 const int pumps[pumpCount] = {4,5};
-const long int pourDelay[pumpCount] = {40000,10000}; // how long to pour per shot
+const long int pourDelay[pumpCount] = {20000,10000}; // how long to pour per shot
 long int pumpEnables[pumpCount];
 int cups[teamCount][sensorCount];
 const int alcoholPerCup[sensorCount] = {1,0,1,0};
 int team = 0;
 const int lights[sensorCount] = {32,33,34,35};
-
-const int calibrationCount = 40;
-double highestNormal[sensorCount];
-double lowestNormal[sensorCount];
-const int extraTolerances[sensorCount] = {0.25,3,0.25,1};
 
 void updateTeam() {
   int newTurnButtonState = digitalRead(turnButton);
@@ -55,7 +50,6 @@ void determineShots() {
   for (int i=0; i<sensorCount; i++) {
     if (cups[team][i]) continue; // don't even bother checking already shot cups
     if (distances[i] < 1) continue; // disconnected cable or wrong measurement
-    // if ((lowestNormal[i] <= distances[i]) && (distances[i] <= highestNormal[i])) continue; // normal values
     if (distances[i] > 10) continue;
     pumpEnables[alcoholPerCup[i]] += pourDelay[alcoholPerCup[i]];
     cups[team][i] = 1;
@@ -87,29 +81,6 @@ void pumpAction() {
   delay(10); // give ultrasound sensors some time
 }
 
-void calibrateSensors() {
-  for (int i=0; i<sensorCount; i++) {
-    double maximum = 0;
-    double minimum = 3000;
-    for (int j=0; j<calibrationCount; j++) {
-      double measurement = measureSensor(i);
-      if (measurement > 2000) continue;
-      maximum = max(maximum, measurement);
-      minimum = min(minimum, measurement);
-    }
-    double extra = (maximum-minimum)*extraTolerances[i];
-    highestNormal[i] = maximum+extra;
-    lowestNormal[i] = minimum-extra;
-    Serial.print("Calibrated sensor ");
-    Serial.print(i);
-    Serial.print(": ");
-    Serial.print(minimum);
-    Serial.print(" - ");
-    Serial.println(maximum);
-  }
-  Serial.println("Measurement complete.");
-}
-
 void setup() {
   Serial.begin(19200);
   pinMode(startButton, INPUT_PULLUP);
@@ -130,8 +101,6 @@ void setup() {
       cups[t][i] = 0; // cups begin unshot
     }
   }
-  //delay(2000);
-  //calibrateSensors();
   updateLights();
 }
 
@@ -149,6 +118,5 @@ void loop() {
   determineShots();
   updateLights();
   pumpAction();
-  //delay(200);
 }
 
